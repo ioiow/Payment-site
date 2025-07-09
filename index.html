@@ -247,6 +247,28 @@
       border-radius: 32px;
     }
   }
+#toast {
+  visibility: hidden;
+  min-width: 200px;
+  background-color: #e74c3c;
+  color: #fff;
+  text-align: center;
+  border-radius: 32px;
+  padding: 12px 24px;
+  position: fixed;
+  z-index: 1300;
+  left: 50%;
+  bottom: 100px;
+  transform: translateX(-50%);
+  font-weight: 600;
+  font-size: 1rem;
+  opacity: 0;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+#toast.show {
+  visibility: visible;
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -327,6 +349,7 @@
 </main>
 
 <div id="overlay" onclick="closeModals()" aria-hidden="true"></div>
+<div id="toast">Адрес скопирован</div>
 
 <!-- Telegram button -->
 <button id="telegram-btn" aria-label="Перейти в Telegram канал IT_Programmer_io" onclick="window.open('https://t.me/IT_Programmer_io', '_blank')">
@@ -361,12 +384,19 @@
 
   overlay.addEventListener('click', closeModals);
 
-  function copy(id) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Адрес скопирован в буфер обмена');
-    });
-  }
+  const toast = document.getElementById('toast');
+
+function copy(id) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast();
+  });
+}
+
+function showToast() {
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
 
   function toggleAddress(id) {
     const el = document.getElementById(id);
