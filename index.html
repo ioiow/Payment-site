@@ -1,348 +1,398 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Оплата Выберите способ оплаты</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(to bottom, #e0f7fa, #ffffff);
-      overflow-x: hidden;
-      color: #333;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Оплата — Выберите способ оплаты</title>
 
-      /* Запрет выделения по всему сайту */
-      user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet" />
 
-    /* Разрешаем выделение для адресов и кнопок */
-    .crypto-address,
-    .copy-btn {
-      user-select: text !important;
-      -webkit-user-select: text !important;
-      -ms-user-select: text !important;
-    }
+<style>
+  body {
+    font-family: 'Rubik', sans-serif;
+    margin: 0; padding: 0;
+    background: linear-gradient(135deg, #d0e7ff, #f9fbff);
+    color: #1e2a38;
+    overflow-x: hidden;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  body.visible {
+    opacity: 1;
+  }
 
-    header {
-      text-align: center;
-      padding: 40px 20px 20px;
-    }
+  header {
+    padding: 30px 24px 20px;
+    max-width: 540px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  header h1 {
+    font-size: 2.4rem;
+    margin: 0 0 6px;
+    font-weight: 700;
+    color: #0c3c78;
+  }
+  header p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #406aadcc;
+  }
 
-    .wallet-icon {
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 15px;
-      fill: #0288d1;
-    }
+  main {
+    max-width: 540px;
+    margin: 20px auto 60px;
+    padding: 0 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-    header h1 {
-      margin: 0;
-      font-size: 32px;
-      color: #01579b;
-    }
+  .payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    margin-top: 24px;
+  }
+  .payment-options button {
+    background: #2f61d7;
+    border: none;
+    border-radius: 50px;
+    padding: 18px 0;
+    color: white;
+    font-weight: 700;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(47, 97, 215, 0.45);
+    user-select: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 320px;
+    align-self: center;
+  }
+  .payment-options button:hover {
+    background: #244ca8;
+    box-shadow: 0 8px 24px rgba(36, 76, 168, 0.65);
+  }
 
-    header p {
-      font-size: 16px;
-      color: #0277bd;
-      font-weight: 600;
-    }
+  /* Overlay */
+  #overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 40, 75, 0.35);
+    z-index: 1000;
+  }
 
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin: 30px 20px;
-    }
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 100%);
+    background: #ffffff;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    box-shadow: 0 -4px 24px rgba(47, 97, 215, 0.35);
+    width: 95%;
+    max-width: 500px;
+    max-height: 75vh;
+    overflow-y: auto;
+    padding: 28px 24px 36px;
+    color: #1e2a38;
+    z-index: 1100;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .modal.show {
+    transform: translate(-50%, 0);
+    display: block;
+  }
+  .modal h3 {
+    margin: 0 0 24px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #2f61d7;
+    text-align: center;
+  }
 
-    .tab {
-      background-color: #0288d1;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px 24px;
-      font-size: 18px;
-      cursor: pointer;
-      flex: 1 1 150px;
-    }
+  .crypto-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e1e9ff;
+    padding-bottom: 14px;
+  }
+  .crypto-label {
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    color: #2f61d7;
+  }
+  .toggle-address {
+    background: none;
+    border: none;
+    color: #2f61d7;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 8px;
+    padding: 0;
+    transition: color 0.3s ease;
+  }
+  .toggle-address:hover {
+    color: #244ca8;
+  }
+  .crypto-address {
+    display: none;
+    background: #f0f5ff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-family: monospace;
+    font-size: 1rem;
+    word-break: break-word;
+    user-select: text !important;
+    margin-bottom: 10px;
+  }
+  .copy-btn {
+    background: #2f61d7;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 32px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(47, 97, 215, 0.4);
+    user-select: text !important;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .copy-btn:hover {
+    background: #244ca8;
+    box-shadow: 0 8px 20px rgba(36, 76, 168, 0.6);
+  }
 
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.2);
-      z-index: 20;
-    }
+  #modal-card p {
+    color: #e74c3c;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+    margin: 0;
+  }
 
-    .modal {
-      display: none;
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: #e1f5fe;
-      border-radius: 15px;
-      padding: 25px 30px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      text-align: left;
-      width: 90%;
-      max-width: 500px;
-      z-index: 21;
-      color: #01579b;
-    }
+  /* Snow container */
+  #snow-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .snowflake {
+    position: absolute;
+    color: white;
+    opacity: 0.85;
+    font-size: 1.1em;
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    user-select: none;
+    pointer-events: none;
+  }
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
 
-    .crypto-item {
-      margin-bottom: 15px;
-      border-bottom: 1px solid #b3e5fc;
-      padding-bottom: 10px;
-    }
+  /* Telegram button fixed at bottom */
+  #telegram-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0088cc;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    padding: 14px 28px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 136, 204, 0.5);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1200;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #telegram-btn:hover {
+    background: #006699;
+    box-shadow: 0 8px 20px rgba(0, 102, 153, 0.7);
+  }
+  #telegram-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: white;
+  }
 
-    .crypto-label {
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-
-    .toggle-address {
-      background: none;
-      border: none;
-      color: #0277bd;
-      cursor: pointer;
-      font-size: 14px;
-      margin-bottom: 6px;
-      padding: 0;
-    }
-
-    .crypto-address {
-      display: none;
-      word-break: break-word;
-      background: #fff;
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 14px;
-      margin: 6px 0;
-    }
-
-    .copy-btn {
-      background-color: #0288d1;
-      color: white;
-      border: none;
-      padding: 6px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    #copied-toast {
-      position: fixed;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #0288d1;
-      color: white;
-      padding: 14px 24px;
-      border-radius: 30px;
-      font-weight: bold;
-      display: none;
-      z-index: 1000;
-    }
-
-    #snow-container {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .snowflake {
-      position: absolute;
-      top: -10px;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation-name: fall;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-    }
-
-    @keyframes fall {
-      0% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(110vh); opacity: 0; }
-    }
-
+  /* Responsive for telegram button */
+  @media (max-width: 480px) {
     #telegram-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #0088cc;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 32px;
     }
-
-    #telegram-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: white;
-    }
-
-    footer {
-      text-align: center;
-      color: #81d4fa;
-      font-size: 14px;
-      padding: 20px;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
 <div id="snow-container"></div>
 
 <header>
-  <svg class="wallet-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <path d="M54 16H10a4 4 0 0 0-4 4v24a4 4 0 0 0 4 4h44a4 4 0 0 0 4-4V20a4 4 0 0 0-4-4zm-2 22a6 6 0 1 1 0-12 6 6 0 0 1 0 12zM10 24h36v16H10z"/>
-  </svg>
-  <h1>Оплата выберите способ</h1>
-  <p>Нажмите, чтобы выбрать способ перевода</p>
+  <h1>Оплата — выберите способ</h1>
+  <p>Нажмите на кнопку ниже, чтобы выбрать способ перевода</p>
 </header>
 
-<div class="tabs">
-  <button class="tab" onclick="openModal('crypto')">Крипта</button>
-  <button class="tab" onclick="openModal('card')">Карта</button>
-  <button class="tab" onclick="openModal('donate')">Донат</button>
-</div>
-
-<div id="overlay" class="overlay" onclick="closeModals()"></div>
-
-<!-- МОДАЛ: CRYPTO -->
-<div id="modal-crypto" class="modal">
-  <h3>Криптовалюты</h3>
-
-  <div class="crypto-item">
-    <div class="crypto-label">USDT (ERC20)</div>
-    <button class="toggle-address" onclick="toggleAddress('addr-usdt')">Показать адрес</button>
-    <div class="crypto-address" id="addr-usdt">0x11C4fDEa62AeA869bCECB19d4A5B3dF083F4a8e9</div>
-    <button class="copy-btn" onclick="copy('addr-usdt')">Скопировать</button>
+<main>
+  <div class="payment-options" role="group" aria-label="Выбор способа оплаты">
+    <button aria-haspopup="dialog" aria-controls="modal-crypto" onclick="openModal('crypto')">Крипта</button>
+    <button aria-haspopup="dialog" aria-controls="modal-card" onclick="openModal('card')">Карта</button>
+    <button onclick="window.open('https://www.donationalerts.com/r/joeio', '_blank')">Донат</button>
   </div>
 
-  <div class="crypto-item">
-    <div class="crypto-label">NotCOIN (JETTON)</div>
-    <button class="toggle-address" onclick="toggleAddress('addr-notcoin')">Показать адрес</button>
-    <div class="crypto-address" id="addr-notcoin">UQCfWYj90QwVaf689WQJsUYTmnKaVTM7jhbOx2rnkvaU9UoE</div>
-    <button class="copy-btn" onclick="copy('addr-notcoin')">Скопировать</button>
+  <!-- Модальное окно: Крипта -->
+  <div id="modal-crypto" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-crypto-title" tabindex="-1">
+    <h3 id="modal-crypto-title">Криптовалюты</h3>
+
+    <div class="crypto-item">
+      <div class="crypto-label">USDT (ERC20)</div>
+      <button class="toggle-address" onclick="toggleAddress('addr-usdt')">Показать адрес</button>
+      <div class="crypto-address" id="addr-usdt">0x11C4fDEa62AeA869bCECB19d4A5B3dF083F4a8e9</div>
+      <button class="copy-btn" onclick="copy('addr-usdt')">Скопировать</button>
+    </div>
+
+    <div class="crypto-item">
+      <div class="crypto-label">NotCOIN (JETTON)</div>
+      <button class="toggle-address" onclick="toggleAddress('addr-notcoin')">Показать адрес</button>
+      <div class="crypto-address" id="addr-notcoin">UQCfWYj90QwVaf689WQJsUYTmnKaVTM7jhbOx2rnkvaU9UoE</div>
+      <button class="copy-btn" onclick="copy('addr-notcoin')">Скопировать</button>
+    </div>
+
+    <div class="crypto-item">
+      <div class="crypto-label">TON COIN</div>
+      <button class="toggle-address" onclick="toggleAddress('addr-ton')">Показать адрес</button>
+      <div class="crypto-address" id="addr-ton">UQCfWYj90QwVaf689WQJsUYTmnKaVTM7jhbOx2rnkvaU9UoE</div>
+      <button class="copy-btn" onclick="copy('addr-ton')">Скопировать</button>
+    </div>
+
+    <div class="crypto-item">
+      <div class="crypto-label">Bitcoin</div>
+      <button class="toggle-address" onclick="toggleAddress('addr-btc')">Показать адрес</button>
+      <div class="crypto-address" id="addr-btc">bc1qufeh2wcarrxqqk5r7nlru25dfjenhfuv9ld5zg</div>
+      <button class="copy-btn" onclick="copy('addr-btc')">Скопировать</button>
+    </div>
+
+    <div class="crypto-item">
+      <div class="crypto-label">Ethereum</div>
+      <button class="toggle-address" onclick="toggleAddress('addr-eth')">Показать адрес</button>
+      <div class="crypto-address" id="addr-eth">0x11C4fDEa62AeA869bCECB19d4A5B3dF083F4a8e9</div>
+      <button class="copy-btn" onclick="copy('addr-eth')">Скопировать</button>
+    </div>
+
+    <div class="crypto-item">
+      <div class="crypto-label">Solana</div>
+      <button class="toggle-address" onclick="toggleAddress('addr-sol')">Показать адрес</button>
+      <div class="crypto-address" id="addr-sol">HpYkwAHv7JoyVNzbpDUd4k3XgXUKqPZzLpQUSpAoY1cS</div>
+      <button class="copy-btn" onclick="copy('addr-sol')">Скопировать</button>
+    </div>
+
+    <div class="crypto-item">
+      <div class="crypto-label">Litecoin</div>
+      <button class="toggle-address" onclick="toggleAddress('addr-ltc')">Показать адрес</button>
+      <div class="crypto-address" id="addr-ltc">ltc1q0vpe82paug82k8jarcp87pkkmytum0tscyyp04</div>
+      <button class="copy-btn" onclick="copy('addr-ltc')">Скопировать</button>
+    </div>
   </div>
 
-  <div class="crypto-item">
-    <div class="crypto-label">TON COIN</div>
-    <button class="toggle-address" onclick="toggleAddress('addr-ton')">Показать адрес</button>
-    <div class="crypto-address" id="addr-ton">UQCfWYj90QwVaf689WQJsUYTmnKaVTM7jhbOx2rnkvaU9UoE</div>
-    <button class="copy-btn" onclick="copy('addr-ton')">Скопировать</button>
+  <!-- Модальное окно: Карта -->
+  <div id="modal-card" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-card-title" tabindex="-1">
+    <h3 id="modal-card-title">Карта</h3>
+    <p>🛠️ Этот способ временно не поддерживается.<br>Поддержка карт находится в разработке.</p>
   </div>
+</main>
 
-  <div class="crypto-item">
-    <div class="crypto-label">Bitcoin</div>
-    <button class="toggle-address" onclick="toggleAddress('addr-btc')">Показать адрес</button>
-    <div class="crypto-address" id="addr-btc">bc1qufeh2wcarrxqqk5r7nlru25dfjenhfuv9ld5zg</div>
-    <button class="copy-btn" onclick="copy('addr-btc')">Скопировать</button>
-  </div>
+<div id="overlay" onclick="closeModals()" aria-hidden="true"></div>
 
-  <div class="crypto-item">
-    <div class="crypto-label">Ethereum</div>
-    <button class="toggle-address" onclick="toggleAddress('addr-eth')">Показать адрес</button>
-    <div class="crypto-address" id="addr-eth">0x11C4fDEa62AeA869bCECB19d4A5B3dF083F4a8e9</div>
-    <button class="copy-btn" onclick="copy('addr-eth')">Скопировать</button>
-  </div>
-
-  <div class="crypto-item">
-    <div class="crypto-label">Solana</div>
-    <button class="toggle-address" onclick="toggleAddress('addr-sol')">Показать адрес</button>
-    <div class="crypto-address" id="addr-sol">HpYkwAHv7JoyVNzbpDUd4k3XgXUKqPZzLpQUSpAoY1cS</div>
-    <button class="copy-btn" onclick="copy('addr-sol')">Скопировать</button>
-  </div>
-
-  <div class="crypto-item">
-    <div class="crypto-label">Litecoin</div>
-    <button class="toggle-address" onclick="toggleAddress('addr-ltc')">Показать адрес</button>
-    <div class="crypto-address" id="addr-ltc">ltc1q0vpe82paug82k8jarcp87pkkmytum0tscyyp04</div>
-    <button class="copy-btn" onclick="copy('addr-ltc')">Скопировать</button>
-  </div>
-</div>
-
-<!-- МОДАЛ: КАРТА -->
-<div id="modal-card" class="modal">
-  <h3>Карта</h3>
-  <p style="color:#f44336; font-weight: bold;">
-    🛠️ Этот способ временно не поддерживается.<br/>
-    Поддержка карт находится в разработке.
-  </p>
-</div>
-
-<!-- Telegram -->
-<a href="https://t.me/IT_Programmer_io" target="_blank" id="telegram-btn" title="Мой Telegram">
-  <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
-    <path d="M120 0C53.7 0 0 53.7 0 120s53.7 120 120 120 120-53.7 120-120S186.3 0 120 0zm58.7 78.7l-22.6 106.7c-1.7 7.4-6.1 9.2-12.3 5.7l-34-25.1-16.4 15.7c-1.8 1.8-3.3 3.3-6.7 3.3l2.4-34.2 62.3-56.3c2.7-2.4-.6-3.7-4.2-1.3l-76.9 48.3-33.1-10.3c-7.2-2.2-7.3-7.2 1.5-10.6l129.9-50c6-2.3 11.3 1.4 9.3 10.3z"/>
+<!-- Telegram button -->
+<button id="telegram-btn" aria-label="Перейти в Telegram канал IT_Programmer_io" onclick="window.open('https://t.me/IT_Programmer_io', '_blank')">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M22.46 2.883a1.2 1.2 0 0 0-1.34-.32L2.4 10.402a1.2 1.2 0 0 0 .023 2.208l5.993 2.3 2.76 5.666a1.2 1.2 0 0 0 2.19.09l3.767-11.77 5.73-6.012a1.2 1.2 0 0 0-.41-1.5z"/>
   </svg>
-</a>
-
-<div id="copied-toast">✅ Скопировано!</div>
-
-<footer>
-  &copy; 2025 Crypto Support Project. Все права защищены.
-</footer>
+  Мой Telegram-канал
+</button>
 
 <script>
+  const overlay = document.getElementById('overlay');
+
   function openModal(id) {
     closeModals();
-    if (id === "donate") {
+    if (id === 'donate') {
       window.open("https://www.donationalerts.com/r/joeio", "_blank");
       return;
     }
-    document.getElementById("overlay").style.display = "block";
-    document.getElementById("modal-" + id).style.display = "block";
+    const modal = document.getElementById('modal-' + id);
+    if (!modal) return;
+    overlay.style.display = 'block';
+    modal.classList.add('show');
+    modal.focus();
   }
 
   function closeModals() {
-    document.getElementById("overlay").style.display = "none";
-    document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
+    overlay.style.display = 'none';
+    document.querySelectorAll('.modal.show').forEach(modal => {
+      modal.classList.remove('show');
+    });
   }
+
+  overlay.addEventListener('click', closeModals);
 
   function copy(id) {
     const text = document.getElementById(id).innerText;
     navigator.clipboard.writeText(text).then(() => {
-      const toast = document.getElementById('copied-toast');
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+      alert('Адрес скопирован в буфер обмена');
     });
   }
 
   function toggleAddress(id) {
     const el = document.getElementById(id);
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
   }
 
-  const snowContainer = document.getElementById("snow-container");
+  // Плавное появление страницы
+  window.addEventListener('load', () => document.body.classList.add('visible'));
+
+  // Снежинки
+  const snowContainer = document.getElementById('snow-container');
   function createSnowflake() {
-    const s = document.createElement("div");
-    s.className = "snowflake";
-    const size = 6 + Math.random() * 8;
-    s.style.width = size + 'px';
-    s.style.height = size + 'px';
-    s.style.left = Math.random() * window.innerWidth + 'px';
-    s.style.animationDuration = (4 + Math.random() * 4) + 's';
-    snowContainer.appendChild(s);
-    setTimeout(() => s.remove(), 10000);
+    const snowflake = document.createElement('div');
+    snowflake.className = 'snowflake';
+    snowflake.textContent = '❄';
+    snowflake.style.left = Math.random() * window.innerWidth + 'px';
+    snowflake.style.fontSize = (12 + Math.random() * 16) + 'px';
+    snowflake.style.animationDuration = (5 + Math.random() * 5) + 's';
+    snowflake.style.opacity = Math.random();
+    snowContainer.appendChild(snowflake);
+
+    setTimeout(() => {
+      snowflake.remove();
+    }, 10000);
   }
-  for (let i = 0; i < 30; i++) createSnowflake();
-  setInterval(createSnowflake, 600);
+  setInterval(createSnowflake, 250);
 </script>
 
 </body>
